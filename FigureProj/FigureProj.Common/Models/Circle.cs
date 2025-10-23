@@ -12,29 +12,35 @@ namespace FigureProj.Common.Models
             {
                 if (value <= 0) { throw new ArgumentOutOfRangeException("Радіус не може бути менше нуля!"); }
                 _radius = value;
+                RaisePropertyChanged($"Радіус змінено на {value}");
             }
         }
 
-        public Circle(double radius, string name, string color) : base(name, color) 
+        // Конструктор
+        public Circle(double radius, string name, string color) : base(name, color)
         {
             Radius = radius;
         }
 
+        // Метод
         public override string ToString()
         {
             return $"Фігура створена: id:{Id}, Ім'я: {Name} , Кольор: {Color}, Радіус: {Radius}";
         }
 
+        // Метод
         public override double CalculateArea()
         {
             return Area = Math.PI * Math.Pow(Radius, 2);
         }
 
+        // Метод
         public override double CalculatePerimetr()
         {
             return Perimeter = 2 * Math.PI * Radius;
         }
 
+        // Метод
         public override void Draw()
         {
             int radius = 5;
