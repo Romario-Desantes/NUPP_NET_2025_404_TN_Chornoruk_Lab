@@ -1,0 +1,59 @@
+﻿using FigureProj.Common.Models.Abstract;
+
+namespace FigureProj.Common.Models
+{
+    public class Circle : Figure
+    {
+        private double _radius;
+        public double Radius
+        {
+            get { return _radius; }
+            set
+            {
+                if (value <= 0) { throw new ArgumentOutOfRangeException("Радіус не може бути менше нуля!"); }
+                _radius = value;
+            }
+        }
+
+        public Circle(double radius, string name, string color) : base(name, color) 
+        {
+            Radius = radius;
+        }
+
+        public override string ToString()
+        {
+            return $"Фігура створена: id:{Id}, Ім'я: {Name} , Кольор: {Color}, Радіус: {Radius}";
+        }
+
+        public override double CalculateArea()
+        {
+            return Area = Math.PI * Math.Pow(Radius, 2);
+        }
+
+        public override double CalculatePerimetr()
+        {
+            return Perimeter = 2 * Math.PI * Radius;
+        }
+
+        public override void Draw()
+        {
+            int radius = 5;
+
+            for (int y = radius; y >= -radius; y--)
+            {
+                for (int x = -radius; x <= radius; x++)
+                {
+                    if (x * x + y * y <= radius * radius)
+                    {
+                        Console.Write("#");
+                    }
+                    else
+                    {
+                        Console.Write(" ");
+                    }
+                }
+                Console.WriteLine();
+            }
+        }
+    }
+}
