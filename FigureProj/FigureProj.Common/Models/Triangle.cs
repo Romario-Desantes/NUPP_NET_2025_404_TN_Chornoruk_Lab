@@ -53,6 +53,27 @@ namespace FigureProj.Common.Models
             C = c;
         }
 
+        // Статичний метод для створення нового об'єкта із згенерованими даними
+        public static Triangle CreateNew()
+        {
+            var random = Random.Shared;
+            double a, b, c;
+            
+            // Генеруємо коректний трикутник
+            do
+            {
+                a = random.Next(1, 51) + random.NextDouble();
+                b = random.Next(1, 51) + random.NextDouble();
+                c = random.Next(1, 51) + random.NextDouble();
+            } while (!IsValidTriangle(a, b, c));
+            
+            string[] colorKeys = PresetColors.Keys.ToArray();
+            string color = colorKeys[random.Next(colorKeys.Length)];
+            string name = $"Трикутник-{random.Next(1000, 9999)}";
+            
+            return new Triangle(a, b, c, name, color);
+        }
+
         // Метод
         public override string ToString()
         {

@@ -33,6 +33,19 @@ namespace FigureProj.Common.Models
             Width = b;
         }
 
+        // Статичний метод для створення нового об'єкта із згенерованими даними
+        public static Rectangle CreateNew()
+        {
+            var random = Random.Shared;
+            double height = random.Next(1, 51) + random.NextDouble();
+            double width = random.Next(1, 51) + random.NextDouble();
+            string[] colorKeys = PresetColors.Keys.ToArray();
+            string color = colorKeys[random.Next(colorKeys.Length)];
+            string name = $"Прямокутник-{random.Next(1000, 9999)}";
+            
+            return new Rectangle(height, width, name, color);
+        }
+
         // Метод
         public override string ToString()
         {

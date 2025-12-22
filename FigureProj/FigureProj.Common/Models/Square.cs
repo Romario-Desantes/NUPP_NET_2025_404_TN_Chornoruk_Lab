@@ -22,6 +22,18 @@ namespace FigureProj.Common.Models
             Side = side;
         }
 
+        // Статичний метод для створення нового об'єкта із згенерованими даними
+        public static Square CreateNew()
+        {
+            var random = Random.Shared;
+            double side = random.Next(1, 51) + random.NextDouble();
+            string[] colorKeys = PresetColors.Keys.ToArray();
+            string color = colorKeys[random.Next(colorKeys.Length)];
+            string name = $"Квадрат-{random.Next(1000, 9999)}";
+            
+            return new Square(side, name, color);
+        }
+
         // Метод
         public override string ToString()
         {

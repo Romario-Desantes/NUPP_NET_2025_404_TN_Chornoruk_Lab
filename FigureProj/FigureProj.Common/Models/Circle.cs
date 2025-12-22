@@ -22,6 +22,18 @@ namespace FigureProj.Common.Models
             Radius = radius;
         }
 
+        // Статичний метод для створення нового об'єкта із згенерованими даними
+        public static Circle CreateNew()
+        {
+            var random = Random.Shared;
+            double radius = random.Next(1, 51) + random.NextDouble();
+            string[] colorKeys = PresetColors.Keys.ToArray();
+            string color = colorKeys[random.Next(colorKeys.Length)];
+            string name = $"Коло-{random.Next(1000, 9999)}";
+            
+            return new Circle(radius, name, color);
+        }
+
         // Метод
         public override string ToString()
         {
