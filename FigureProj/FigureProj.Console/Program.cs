@@ -297,9 +297,9 @@ namespace FigureProj.Console
             try
             {
                 // Підключення до MongoDB
-                var mongoConnectionString = "mongodb://localhost:27017";
+                var mongoConnectionString = "mongodb+srv://admin:1234@figuredb.1baqil8.mongodb.net/";
                 var mongoClient = new MongoClient(mongoConnectionString);
-                var database = mongoClient.GetDatabase("figuredb_nosql");
+                var database = mongoClient.GetDatabase("figuredb");
 
                 System.Console.WriteLine($"→ Підключення до MongoDB: {mongoConnectionString}");
                 
