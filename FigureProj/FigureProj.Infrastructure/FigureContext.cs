@@ -60,6 +60,15 @@ namespace FigureProj.Infrastructure
                 .Property(f => f.CreatedAt)
                 .HasDefaultValueSql("NOW()");
 
+            modelBuilder.Entity<FigureModel>()
+                .Property(f => f.DomainId)
+                .IsRequired();
+
+            modelBuilder.Entity<FigureModel>()
+                .HasIndex(f => f.DomainId)
+                .IsUnique()
+                .HasDatabaseName("IX_Figures_DomainId_Unique");
+
             // Table-per-Type: окремі таблиці для кожного типу фігури
             modelBuilder.Entity<CircleModel>()
                 .ToTable("Circles")

@@ -13,6 +13,7 @@ namespace FigureProj.Infrastructure.Mapping
             {
                 Circle circle => new CircleModel
                 {
+                    DomainId = circle.Id,
                     Name = circle.Name,
                     Color = circle.Color,
                     Area = circle.Area,
@@ -22,6 +23,7 @@ namespace FigureProj.Infrastructure.Mapping
                 },
                 Rectangle rectangle => new RectangleModel
                 {
+                    DomainId = rectangle.Id,
                     Name = rectangle.Name,
                     Color = rectangle.Color,
                     Area = rectangle.Area,
@@ -32,6 +34,7 @@ namespace FigureProj.Infrastructure.Mapping
                 },
                 Square square => new SquareModel
                 {
+                    DomainId = square.Id,
                     Name = square.Name,
                     Color = square.Color,
                     Area = square.Area,
@@ -41,6 +44,7 @@ namespace FigureProj.Infrastructure.Mapping
                 },
                 Triangle triangle => new TriangleModel
                 {
+                    DomainId = triangle.Id,
                     Name = triangle.Name,
                     Color = triangle.Color,
                     Area = triangle.Area,
@@ -59,10 +63,10 @@ namespace FigureProj.Infrastructure.Mapping
         {
             Figure figure = dbModel switch
             {
-                CircleModel circle => new Circle(circle.Radius, circle.Name, circle.Color),
-                RectangleModel rectangle => new Rectangle(rectangle.Height, rectangle.Width, rectangle.Name, rectangle.Color),
-                SquareModel square => new Square(square.Side, square.Name, square.Color),
-                TriangleModel triangle => new Triangle(triangle.A, triangle.B, triangle.C, triangle.Name, triangle.Color),
+                CircleModel circle => new Circle(circle.Radius, circle.Name, circle.Color) { Id = circle.DomainId },
+                RectangleModel rectangle => new Rectangle(rectangle.Height, rectangle.Width, rectangle.Name, rectangle.Color) { Id = rectangle.DomainId },
+                SquareModel square => new Square(square.Side, square.Name, square.Color) { Id = square.DomainId },
+                TriangleModel triangle => new Triangle(triangle.A, triangle.B, triangle.C, triangle.Name, triangle.Color) { Id = triangle.DomainId },
                 _ => throw new ArgumentException($"Unknown figure model type: {dbModel.GetType().Name}")
             };
             

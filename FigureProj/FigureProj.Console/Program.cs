@@ -22,7 +22,7 @@ namespace FigureProj.Console
             System.Console.WriteLine("╚════════════════════════════════════════════════════════════════╝\n");
 
             // Налаштування підключення до PostgreSQL
-            var connectionString = "Host=localhost;Database=figuredb;Username=postgres;Password=postgres";
+            var connectionString = "Host=localhost;Database=figuredb;Username=postgres;Password=1234";
             
             var optionsBuilder = new DbContextOptionsBuilder<FigureContext>();
             optionsBuilder.UseNpgsql(connectionString);

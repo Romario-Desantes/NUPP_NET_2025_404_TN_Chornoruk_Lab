@@ -3,6 +3,7 @@ namespace FigureProj.Infrastructure.Models
     public abstract class FigureModel
     {
         public int Id { get; set; }
+        public Guid DomainId { get; set; }  // Guid from domain model
         public string Name { get; set; } = string.Empty;
         public string Color { get; set; } = string.Empty;
         public double Area { get; set; }

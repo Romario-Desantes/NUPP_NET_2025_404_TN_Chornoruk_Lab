@@ -15,13 +15,11 @@ namespace FigureProj.Infrastructure.Services
     {
         private readonly FigureContext _context;
         private readonly IRepository<FigureModel> _repository;
-        private Dictionary<Guid, int> _guidToIdMapping;
 
         public DbCrudServiceAsync(FigureContext context, IRepository<FigureModel> repository)
         {
             _context = context;
             _repository = repository;
-            _guidToIdMapping = new Dictionary<Guid, int>();
         }
 
         public async Task<bool> CreateAsync(T element)
@@ -39,27 +37,15 @@ namespace FigureProj.Infrastructure.Services
             await _repository.AddAsync(dbModel);
             await _context.SaveChangesAsync();
 
-            // Зберігаємо маппінг Guid -> Id
-            _guidToIdMapping[element.Id] = dbModel.Id;
-
             return true;
         }
 
         public async Task<T> ReadAsync(Guid id)
         {
-            // Знаходимо Id в БД за Guid
-            if (!_guidToIdMapping.TryGetValue(id, out int dbId))
-            {
-                // Якщо не знайдено в кеші, шукаємо по імені (fallback)
-                var allFigures = await _repository.GetAllAsync();
-                var foundFigure = allFigures.FirstOrDefault();
-                if (foundFigure == null)
-                    throw new KeyNotFoundException($"Елемент з ID {id} не знайдено.");
-                
-                dbId = foundFigure.Id;
-            }
+            // Знаходимо фігуру в БД за DomainId (Guid)
+            var dbModel = await _context.Figures
+                .FirstOrDefaultAsync(f => f.DomainId == id);
 
-            var dbModel = await _repository.GetByIdAsync(dbId);
             if (dbModel == null)
                 throw new KeyNotFoundException($"Елемент з ID {id} не знайдено.");
 
@@ -98,13 +84,10 @@ namespace FigureProj.Infrastructure.Services
             element.CalculateArea();
             element.CalculatePerimetr();
 
-            // Знаходимо Id в БД за Guid
-            if (!_guidToIdMapping.TryGetValue(element.Id, out int dbId))
-            {
-                throw new KeyNotFoundException($"Елемент з ID {element.Id} не знайдено для оновлення.");
-            }
+            // Знаходимо фігуру в БД за DomainId
+            var dbModel = await _context.Figures
+                .FirstOrDefaultAsync(f => f.DomainId == element.Id);
 
-            var dbModel = await _repository.GetByIdAsync(dbId);
             if (dbModel == null)
                 throw new KeyNotFoundException($"Елемент з ID {element.Id} не знайдено для оновлення.");
 
@@ -122,20 +105,15 @@ namespace FigureProj.Infrastructure.Services
             if (element == null)
                 throw new ArgumentNullException(nameof(element));
 
-            // Знаходимо Id в БД за Guid
-            if (!_guidToIdMapping.TryGetValue(element.Id, out int dbId))
-            {
-                throw new KeyNotFoundException($"Елемент з ID {element.Id} не знайдено для видалення.");
-            }
+            // Знаходимо фігуру в БД за DomainId
+            var dbModel = await _context.Figures
+                .FirstOrDefaultAsync(f => f.DomainId == element.Id);
 
-            var dbModel = await _repository.GetByIdAsync(dbId);
             if (dbModel == null)
                 throw new KeyNotFoundException($"Елемент з ID {element.Id} не знайдено для видалення.");
 
             await _repository.Delete(dbModel);
             await _context.SaveChangesAsync();
-
-            _guidToIdMapping.Remove(element.Id);
 
             return true;
         }
