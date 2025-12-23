@@ -10,3 +10,4 @@ namespace FigureProj.Infrastructure.Repositories
     }
 }
 
+

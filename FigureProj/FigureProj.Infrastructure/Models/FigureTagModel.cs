@@ -15,3 +15,4 @@ namespace FigureProj.Infrastructure.Models
     }
 }
 
+
