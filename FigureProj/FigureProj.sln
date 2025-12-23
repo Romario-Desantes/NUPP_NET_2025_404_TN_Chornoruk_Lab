@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FigureProj.Infrastructure",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FigureProj.NoSql", "FigureProj.NoSql\FigureProj.NoSql.csproj", "{DA7E2315-0178-481C-A665-6945639A9A25}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FigureProj.REST", "FigureProj.REST\FigureProj.REST.csproj", "{94DADEAD-716D-471A-B8B7-D4BE6D77AD10}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +44,9 @@ Global
 		{DA7E2315-0178-481C-A665-6945639A9A25}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA7E2315-0178-481C-A665-6945639A9A25}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA7E2315-0178-481C-A665-6945639A9A25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94DADEAD-716D-471A-B8B7-D4BE6D77AD10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94DADEAD-716D-471A-B8B7-D4BE6D77AD10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94DADEAD-716D-471A-B8B7-D4BE6D77AD10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94DADEAD-716D-471A-B8B7-D4BE6D77AD10}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
