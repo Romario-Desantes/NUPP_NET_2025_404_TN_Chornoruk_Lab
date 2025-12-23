@@ -1,4 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Text;
 using FigureProj.Infrastructure;
 using FigureProj.Infrastructure.Repositories;
 using FigureProj.Infrastructure.Services;
@@ -11,19 +16,45 @@ var builder = WebApplication.CreateBuilder(args);
 // Додаємо контролери
 builder.Services.AddControllers();
 
-// Налаштування Swagger/OpenAPI
+// Налаштування Swagger/OpenAPI з підтримкою JWT
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    options.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "FigureProj REST API",
         Version = "v1",
-        Description = "REST API для роботи з геометричними фігурами (Лабораторна робота №4)",
-        Contact = new Microsoft.OpenApi.Models.OpenApiContact
+        Description = "REST API для роботи з геометричними фігурами (Лабораторна робота №5 - Identity)",
+        Contact = new OpenApiContact
         {
             Name = "Роман Чорнорук",
             Email = "roman@example.com"
+        }
+    });
+
+    // Додавання JWT аутентифікації в Swagger
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Введіть JWT токен у форматі: Bearer {your token}"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
         }
     });
 });
@@ -34,6 +65,50 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 builder.Services.AddDbContext<FigureContext>(options =>
     options.UseNpgsql(connectionString));
+
+// Налаштування Identity
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{
+    // Налаштування паролів
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequiredLength = 6;
+
+    // Налаштування користувача
+    options.User.RequireUniqueEmail = true;
+
+    // Налаштування входу
+    options.SignIn.RequireConfirmedEmail = false;
+})
+.AddEntityFrameworkStores<FigureContext>()
+.AddDefaultTokenProviders();
+
+// Налаштування JWT Authentication
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey не налаштований");
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidAudience = jwtSettings["Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+    };
+});
+
+builder.Services.AddAuthorization();
 
 // Dependency Injection для репозиторіїв та сервісів
 builder.Services.AddScoped<IRepository<FigureModel>, FigureRepository>();
@@ -52,18 +127,31 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Застосування міграцій при старті (опціонально)
+// Ініціалізація бази даних та ролей
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<FigureContext>();
+    var services = scope.ServiceProvider;
+    
     try
     {
+        // Застосування міграцій
+        var dbContext = services.GetRequiredService<FigureContext>();
         await dbContext.Database.MigrateAsync();
         Console.WriteLine("✓ База даних готова до роботи");
+
+        // Ініціалізація ролей
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        await SeedRolesAsync(roleManager);
+        Console.WriteLine("✓ Ролі ініціалізовані");
+
+        // Створення адміністратора (опціонально)
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+        await SeedAdminUserAsync(userManager);
+        Console.WriteLine("✓ Адміністратор створений");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"✗ Помилка підключення до БД: {ex.Message}");
+        Console.WriteLine($"✗ Помилка ініціалізації: {ex.Message}");
     }
 }
 
@@ -80,13 +168,61 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors();
-app.UseAuthorization();
+
+// ВАЖЛИВО: Порядок middleware має значення!
+app.UseAuthentication(); // Спочатку аутентифікація
+app.UseAuthorization();  // Потім авторизація
+
 app.MapControllers();
 
 Console.WriteLine("╔════════════════════════════════════════════════════════════════╗");
-Console.WriteLine("║           FigureProj REST API - Лабораторна робота №4         ║");
+Console.WriteLine("║           FigureProj REST API - Лабораторна робота №5         ║");
+Console.WriteLine("║                  Identity & JWT Authentication                ║");
 Console.WriteLine("╚════════════════════════════════════════════════════════════════╝");
 Console.WriteLine($"→ Swagger UI: {(app.Environment.IsDevelopment() ? "http://localhost:5000" : "")}");
 Console.WriteLine("→ Документація API доступна на головній сторінці");
+Console.WriteLine("→ Ролі: Administrator, Editor, Viewer");
 
 app.Run();
+
+// Метод для створення ролей
+async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
+{
+    string[] roles = { "Administrator", "Editor", "Viewer" };
+
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+            Console.WriteLine($"  → Роль '{role}' створена");
+        }
+    }
+}
+
+// Метод для створення адміністратора за замовчуванням
+async Task SeedAdminUserAsync(UserManager<ApplicationUser> userManager)
+{
+    var adminEmail = "admin@figureproj.com";
+    
+    var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
+    if (existingAdmin == null)
+    {
+        var adminUser = new ApplicationUser
+        {
+            UserName = "admin",
+            Email = adminEmail,
+            FullName = "System Administrator",
+            CreatedAt = DateTime.UtcNow,
+            EmailConfirmed = true
+        };
+
+        var result = await userManager.CreateAsync(adminUser, "Admin123!");
+        
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(adminUser, "Administrator");
+            Console.WriteLine($"  → Адміністратор створений: {adminEmail} / Admin123!");
+        }
+    }
+}

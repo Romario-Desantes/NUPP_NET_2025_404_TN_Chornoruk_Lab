@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using FigureProj.Infrastructure.Models;
 
 namespace FigureProj.Infrastructure
 {
-    public class FigureContext : DbContext
+    public class FigureContext : IdentityDbContext<ApplicationUser>
     {
         public DbSet<FigureModel> Figures { get; set; }
         public DbSet<CircleModel> Circles { get; set; }

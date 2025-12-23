@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using FigureProj.REST.Models;
 using FigureProj.Infrastructure;
@@ -75,9 +76,11 @@ namespace FigureProj.REST.Controllers
         /// </summary>
         /// <param name="createDto">Дані для створення колекції</param>
         /// <returns>Створена колекція</returns>
+        [Authorize]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<CollectionDto>> Create([FromBody] CreateCollectionDto createDto)
         {
             if (!ModelState.IsValid)
@@ -108,10 +111,13 @@ namespace FigureProj.REST.Controllers
         /// <param name="id">ID колекції</param>
         /// <param name="updateDto">Дані для оновлення</param>
         /// <returns>Результат операції</returns>
+        [Authorize(Roles = "Editor,Administrator")]
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<CollectionDto>> Update(int id, [FromBody] UpdateCollectionDto updateDto)
         {
             if (id != updateDto.Id)
@@ -149,9 +155,12 @@ namespace FigureProj.REST.Controllers
         /// </summary>
         /// <param name="id">ID колекції</param>
         /// <returns>Результат операції</returns>
+        [Authorize(Roles = "Administrator")]
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> Delete(int id)
         {
             _logger.LogInformation("Запит на видалення колекції з ID: {Id}", id);

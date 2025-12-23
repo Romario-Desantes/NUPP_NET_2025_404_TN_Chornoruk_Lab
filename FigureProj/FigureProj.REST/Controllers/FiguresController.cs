@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using FigureProj.REST.Models;
 using FigureProj.Common.Services;
 using FigureProj.Common.Models.Abstract;
@@ -95,9 +96,11 @@ namespace FigureProj.REST.Controllers
         /// </summary>
         /// <param name="createDto">Дані для створення фігури</param>
         /// <returns>Створена фігура</returns>
+        [Authorize]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<FigureDto>> Create([FromBody] CreateFigureDto createDto)
         {
             if (!ModelState.IsValid)
@@ -130,10 +133,13 @@ namespace FigureProj.REST.Controllers
         /// <param name="id">ID фігури</param>
         /// <param name="updateDto">Дані для оновлення</param>
         /// <returns>Результат операції</returns>
+        [Authorize(Roles = "Editor,Administrator")]
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<ActionResult<FigureDto>> Update(Guid id, [FromBody] UpdateFigureDto updateDto)
         {
             if (id != updateDto.Id)
@@ -178,9 +184,12 @@ namespace FigureProj.REST.Controllers
         /// </summary>
         /// <param name="id">ID фігури</param>
         /// <returns>Результат операції</returns>
+        [Authorize(Roles = "Administrator")]
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> Delete(Guid id)
         {
             _logger.LogInformation("Запит на видалення фігури з ID: {Id}", id);
