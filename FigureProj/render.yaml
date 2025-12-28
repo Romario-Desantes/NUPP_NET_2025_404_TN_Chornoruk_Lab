@@ -22,6 +22,10 @@ services:
         fromDatabase:
           name: figureproj-db
           property: connectionString
+      - key: CONNECTIONSTRINGS__DEFAULTCONNECTION
+        fromDatabase:
+          name: figureproj-db
+          property: connectionString
       - key: JWTSETTINGS__SECRETKEY
         generateValue: true
         sync: false
