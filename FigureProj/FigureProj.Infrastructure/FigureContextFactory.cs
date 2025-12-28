@@ -35,7 +35,6 @@ namespace FigureProj.Infrastructure
                     .SetBasePath(Directory.GetCurrentDirectory())
                     .AddJsonFile("appsettings.json", optional: true)
                     .AddJsonFile("appsettings.Development.json", optional: true)
-                    .AddEnvironmentVariables()
                     .Build();
                 
                 connectionString = configuration.GetConnectionString("DefaultConnection");
