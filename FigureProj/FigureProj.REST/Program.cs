@@ -170,7 +170,9 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Configure the HTTP request pipeline
-if (app.Environment.IsDevelopment())
+// Swagger доступний в усіх середовищах (можна вимкнути через ENABLE_SWAGGER=false)
+var enableSwagger = Environment.GetEnvironmentVariable("ENABLE_SWAGGER");
+if (enableSwagger != "false")
 {
     app.UseSwagger();
     app.UseSwaggerUI(options =>
@@ -199,14 +201,11 @@ Console.WriteLine("╔═══════════════════�
 Console.WriteLine("║           FigureProj REST API - Лабораторна робота №5         ║");
 Console.WriteLine("║                  Identity & JWT Authentication                ║");
 Console.WriteLine("╚════════════════════════════════════════════════════════════════╝");
-if (app.Environment.IsDevelopment())
+if (enableSwagger != "false")
 {
     Console.WriteLine($"→ Swagger UI: {baseUrl}");
 }
-else
-{
-    Console.WriteLine($"→ API запущено на порту {port}");
-}
+Console.WriteLine($"→ API запущено на порту {port}");
 Console.WriteLine("→ Документація API доступна на головній сторінці");
 Console.WriteLine("→ Ролі: Administrator, Editor, Viewer");
 
