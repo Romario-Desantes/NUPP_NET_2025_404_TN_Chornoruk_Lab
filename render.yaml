@@ -1,18 +1,16 @@
-services:
-  # PostgreSQL Database
-  - type: postgresql
-    name: figureproj-db
+databases:
+  - name: figureproj-db
     plan: starter
     databaseName: figuredb
-    user: figureproj_user
 
+services:
   # REST API Web Service
   - type: web
     name: figureproj-api
     runtime: docker
     plan: starter
-    dockerfilePath: ./Dockerfile
-    dockerContext: .
+    dockerfilePath: ./FigureProj/Dockerfile
+    dockerContext: ./FigureProj
     buildCommand: ""
     startCommand: ""
     envVars:
