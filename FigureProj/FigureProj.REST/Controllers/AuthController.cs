@@ -81,7 +81,7 @@ namespace FigureProj.REST.Controllers
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
                 _logger.LogWarning("Помилка реєстрації: {Errors}", errors);
-                return BadRequest(new { message = "Помилка реєстрації", errors = result.Errors });
+                return BadRequest(new { message = "Помилка реєстрації", errors = result.Errors.Select(e => new { code = e.Code, description = e.Description }) });
             }
 
             // Призначення ролі

@@ -66,9 +66,21 @@ var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 // Підтримка DATABASE_URL від Render (формат: postgresql://user:pass@host:port/dbname)
 if (string.IsNullOrEmpty(connectionString) && !string.IsNullOrEmpty(databaseUrl))
 {
-    var uri = new Uri(databaseUrl);
-    var userInfo = uri.UserInfo.Split(':');
-    connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.LocalPath.TrimStart('/')};Username={userInfo[0]};Password={Uri.UnescapeDataString(userInfo[1])};SSL Mode=Require;Trust Server Certificate=true";
+    try
+    {
+        var uri = new Uri(databaseUrl);
+        var userInfo = uri.UserInfo.Split(':');
+        if (userInfo.Length >= 2)
+        {
+            var password = string.Join(":", userInfo.Skip(1)); // Обробляємо випадок, коли пароль містить ":"
+            connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.LocalPath.TrimStart('/')};Username={Uri.UnescapeDataString(userInfo[0])};Password={Uri.UnescapeDataString(password)};SSL Mode=Require;Trust Server Certificate=true";
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"⚠ Помилка парсингу DATABASE_URL: {ex.Message}");
+        // Продовжуємо з іншими джерелами connection string
+    }
 }
 
 if (string.IsNullOrEmpty(connectionString))
@@ -166,6 +178,11 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         Console.WriteLine($"✗ Помилка ініціалізації: {ex.Message}");
+        Console.WriteLine($"✗ Stack trace: {ex.StackTrace}");
+        if (ex.InnerException != null)
+        {
+            Console.WriteLine($"✗ Inner exception: {ex.InnerException.Message}");
+        }
     }
 }
 
