@@ -2,16 +2,17 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy solution file and restore dependencies
-COPY FigureProj.sln ./
+# Copy project files for dependency resolution
 COPY FigureProj.Common/FigureProj.Common.csproj FigureProj.Common/
 COPY FigureProj.Infrastructure/FigureProj.Infrastructure.csproj FigureProj.Infrastructure/
 COPY FigureProj.REST/FigureProj.REST.csproj FigureProj.REST/
 
-# Restore NuGet packages
+# Restore NuGet packages (restore only REST project, it will pull dependencies automatically)
+WORKDIR /src/FigureProj.REST
 RUN dotnet restore
 
 # Copy all source files
+WORKDIR /src
 COPY FigureProj.Common/ FigureProj.Common/
 COPY FigureProj.Infrastructure/ FigureProj.Infrastructure/
 COPY FigureProj.REST/ FigureProj.REST/
