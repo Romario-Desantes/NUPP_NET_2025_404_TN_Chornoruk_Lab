@@ -7,6 +7,8 @@
         IEnumerable<T> ReadAll();
         void Update(T element);
         void Remove(T element);
+        void Save(string FilePath);
+        void Load(string FilePath);
     }
 }
 

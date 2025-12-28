@@ -112,6 +112,40 @@ namespace FigureProj.Console
             {
                 System.Console.WriteLine(figure.GetDetailedInfo());
             }
+
+            System.Console.WriteLine("\n11. ЗБЕРЕЖЕННЯ ДАНИХ У ФАЙЛ (SAVE)\n");
+
+            string filePath = "figures_data.json";
+            try
+            {
+                figureService.Save(filePath);
+                System.Console.WriteLine($"Файл збережено: {System.IO.Path.GetFullPath(filePath)}");
+            }
+            catch (Exception ex)
+            {
+                System.Console.WriteLine($"Помилка при збереженні: {ex.Message}");
+            }
+
+            System.Console.WriteLine("\n12. ЗАВАНТАЖЕННЯ ДАНИХ З ФАЙЛУ (LOAD)\n");
+
+            // Створюємо новий сервіс для демонстрації завантаження
+            var newFigureService = new CrudService<Figure>();
+            System.Console.WriteLine($"Кількість фігур у новому сервісі до завантаження: {CrudService<Figure>.GetCount(newFigureService)}");
+
+            try
+            {
+                newFigureService.Load(filePath);
+                System.Console.WriteLine($"\nФігури після завантаження з файлу:");
+                foreach (var figure in newFigureService.ReadAll())
+                {
+                    System.Console.WriteLine($"  • {figure.Name} (ID: {figure.Id}, Тип: {figure.GetType().Name})");
+                }
+                System.Console.WriteLine($"\nВсього завантажено фігур: {CrudService<Figure>.GetCount(newFigureService)}");
+            }
+            catch (Exception ex)
+            {
+                System.Console.WriteLine($"Помилка при завантаженні: {ex.Message}");
+            }
         }
     }
 }

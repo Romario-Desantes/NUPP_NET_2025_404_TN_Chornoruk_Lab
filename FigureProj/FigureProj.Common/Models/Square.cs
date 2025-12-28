@@ -16,6 +16,11 @@ namespace FigureProj.Common.Models
             }
         }
 
+        // Конструктор без параметрів для JSON десеріалізації
+        public Square() : base()
+        {
+        }
+
         // Конструктор
         public Square(double side, string name, string color) : base(name, color)
         {

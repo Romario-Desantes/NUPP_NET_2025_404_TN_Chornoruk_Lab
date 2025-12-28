@@ -1,8 +1,15 @@
-﻿namespace FigureProj.Common.Models.Abstract
+﻿using System.Text.Json.Serialization;
+using FigureProj.Common.Models;
+
+namespace FigureProj.Common.Models.Abstract
 {
     // Делегат
     public delegate void FigureEventHandler(Figure figure, string message);
 
+    [JsonDerivedType(typeof(Circle), typeDiscriminator: "circle")]
+    [JsonDerivedType(typeof(Rectangle), typeDiscriminator: "rectangle")]
+    [JsonDerivedType(typeof(Square), typeDiscriminator: "square")]
+    [JsonDerivedType(typeof(Triangle), typeDiscriminator: "triangle")]
     public abstract class Figure
     {
         public Guid Id { get; set; }
@@ -36,6 +43,14 @@
                 { "коричневий", "#8B4513" }
             };
 
+        }
+
+        // Конструктор без параметрів для JSON десеріалізації
+        protected Figure()
+        {
+            Id = Guid.NewGuid();
+            Name = "";
+            Color = DefaultColor;
         }
 
         // Конструктор

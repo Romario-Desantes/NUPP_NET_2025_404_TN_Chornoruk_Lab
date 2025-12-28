@@ -16,6 +16,11 @@ namespace FigureProj.Common.Models
             }
         }
 
+        // Конструктор без параметрів для JSON десеріалізації
+        public Circle() : base()
+        {
+        }
+
         // Конструктор
         public Circle(double radius, string name, string color) : base(name, color)
         {

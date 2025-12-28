@@ -39,6 +39,11 @@ namespace FigureProj.Common.Models
             }
         }
 
+        // Конструктор без параметрів для JSON десеріалізації
+        public Triangle() : base()
+        {
+        }
+
         // Конструктор
         public Triangle(double a, double b, double c, string name, string color) : base(name, color)
         {

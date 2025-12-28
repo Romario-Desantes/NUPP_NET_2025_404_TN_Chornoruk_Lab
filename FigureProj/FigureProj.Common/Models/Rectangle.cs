@@ -26,6 +26,11 @@ namespace FigureProj.Common.Models
                 RaisePropertyChanged($"Ширина змінена на {value}");
             }
         }
+        // Конструктор без параметрів для JSON десеріалізації
+        public Rectangle() : base()
+        {
+        }
+
         // Конструктор
         public Rectangle(double a, double b, string name, string color) : base(name, color)
         {
