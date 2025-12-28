@@ -1,0 +1,24 @@
+# Connection String для PostgreSQL
+# Формат: Host=hostname;Port=5432;Database=dbname;Username=user;Password=password
+# Або використовуйте DATABASE_URL від Render (автоматично конвертується)
+CONNECTIONSTRINGS__DEFAULTCONNECTION=Host=localhost;Database=figuredb;Username=postgres;Password=your_password
+
+# Або використовуйте DATABASE_URL від Render (якщо використовуєте Render PostgreSQL)
+# DATABASE_URL=postgresql://user:password@host:port/database
+
+# JWT Settings
+JWTSETTINGS__SECRETKEY=YourSuperSecretKeyForJwtTokenGeneration2024!MustBeLongEnoughForSecurity
+JWTSETTINGS__ISSUER=FigureProj.REST
+JWTSETTINGS__AUDIENCE=FigureProj.Client
+JWTSETTINGS__EXPIRATIONDAYS=7
+
+# Admin User (створюється автоматично при першому запуску, якщо вказані)
+ADMIN__EMAIL=admin@figureproj.com
+ADMIN__PASSWORD=ChangeThisPassword123!
+
+# ASP.NET Core Environment
+ASPNETCORE_ENVIRONMENT=Production
+
+# Port (для Render встановлюється автоматично)
+# PORT=5000
+

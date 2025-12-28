@@ -60,8 +60,21 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 // Підключення до PostgreSQL
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? "Host=localhost;Database=figuredb;Username=postgres;Password=1234";
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+// Підтримка DATABASE_URL від Render (формат: postgresql://user:pass@host:port/dbname)
+if (string.IsNullOrEmpty(connectionString) && !string.IsNullOrEmpty(databaseUrl))
+{
+    var uri = new Uri(databaseUrl);
+    var userInfo = uri.UserInfo.Split(':');
+    connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.LocalPath.TrimStart('/')};Username={userInfo[0]};Password={Uri.UnescapeDataString(userInfo[1])};SSL Mode=Require;Trust Server Certificate=true";
+}
+
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new InvalidOperationException("Connection string не налаштований. Встановіть ConnectionStrings__DefaultConnection або DATABASE_URL");
+}
 
 builder.Services.AddDbContext<FigureContext>(options =>
     options.UseNpgsql(connectionString));
@@ -146,7 +159,8 @@ using (var scope = app.Services.CreateScope())
 
         // Створення адміністратора (опціонально)
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-        await SeedAdminUserAsync(userManager);
+        var configuration = services.GetRequiredService<IConfiguration>();
+        await SeedAdminUserAsync(userManager, configuration);
         Console.WriteLine("✓ Адміністратор створений");
     }
     catch (Exception ex)
@@ -175,11 +189,24 @@ app.UseAuthorization();  // Потім авторизація
 
 app.MapControllers();
 
+// Отримуємо порт для виводу в консоль (для Render PORT встановлюється автоматично)
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+var baseUrl = app.Environment.IsDevelopment() 
+    ? $"http://localhost:{port}" 
+    : $"http://0.0.0.0:{port}";
+
 Console.WriteLine("╔════════════════════════════════════════════════════════════════╗");
 Console.WriteLine("║           FigureProj REST API - Лабораторна робота №5         ║");
 Console.WriteLine("║                  Identity & JWT Authentication                ║");
 Console.WriteLine("╚════════════════════════════════════════════════════════════════╝");
-Console.WriteLine($"→ Swagger UI: {(app.Environment.IsDevelopment() ? "http://localhost:5000" : "")}");
+if (app.Environment.IsDevelopment())
+{
+    Console.WriteLine($"→ Swagger UI: {baseUrl}");
+}
+else
+{
+    Console.WriteLine($"→ API запущено на порту {port}");
+}
 Console.WriteLine("→ Документація API доступна на головній сторінці");
 Console.WriteLine("→ Ролі: Administrator, Editor, Viewer");
 
@@ -201,28 +228,47 @@ async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
 }
 
 // Метод для створення адміністратора за замовчуванням
-async Task SeedAdminUserAsync(UserManager<ApplicationUser> userManager)
+async Task SeedAdminUserAsync(UserManager<ApplicationUser> userManager, IConfiguration configuration)
 {
-    var adminEmail = "admin@figureproj.com";
+    var adminEmail = configuration["Admin:Email"] 
+        ?? Environment.GetEnvironmentVariable("ADMIN__EMAIL");
+    var adminPassword = configuration["Admin:Password"] 
+        ?? Environment.GetEnvironmentVariable("ADMIN__PASSWORD");
+
+    // Пропускаємо створення адміністратора, якщо не вказані credentials
+    if (string.IsNullOrEmpty(adminEmail) || string.IsNullOrEmpty(adminPassword))
+    {
+        Console.WriteLine("  → Створення адміністратора пропущено (не вказані Admin:Email/Admin:Password)");
+        return;
+    }
     
     var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
     if (existingAdmin == null)
     {
         var adminUser = new ApplicationUser
         {
-            UserName = "admin",
+            UserName = adminEmail.Split('@')[0],
             Email = adminEmail,
             FullName = "System Administrator",
             CreatedAt = DateTime.UtcNow,
             EmailConfirmed = true
         };
 
-        var result = await userManager.CreateAsync(adminUser, "Admin123!");
+        var result = await userManager.CreateAsync(adminUser, adminPassword);
         
         if (result.Succeeded)
         {
             await userManager.AddToRoleAsync(adminUser, "Administrator");
-            Console.WriteLine($"  → Адміністратор створений: {adminEmail} / Admin123!");
+            Console.WriteLine($"  → Адміністратор створений: {adminEmail}");
         }
+        else
+        {
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            Console.WriteLine($"  → Помилка створення адміністратора: {errors}");
+        }
+    }
+    else
+    {
+        Console.WriteLine($"  → Адміністратор вже існує: {adminEmail}");
     }
 }
