@@ -1,0 +1,41 @@
+databases:
+  - name: figureproj-db
+    plan: starter
+    databaseName: figuredb
+
+services:
+  # REST API Web Service
+  - type: web
+    name: figureproj-api
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./FigureProj/Dockerfile
+    dockerContext: ./FigureProj
+    buildCommand: ""
+    startCommand: ""
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: figureproj-db
+          property: connectionString
+      - key: CONNECTIONSTRINGS__DEFAULTCONNECTION
+        fromDatabase:
+          name: figureproj-db
+          property: connectionString
+      - key: JWTSETTINGS__SECRETKEY
+        generateValue: true
+        sync: false
+      - key: JWTSETTINGS__ISSUER
+        value: FigureProj.REST
+      - key: JWTSETTINGS__AUDIENCE
+        value: FigureProj.Client
+      - key: JWTSETTINGS__EXPIRATIONDAYS
+        value: 7
+      - key: ADMIN__EMAIL
+        value: admin@figureproj.com
+      - key: ADMIN__PASSWORD
+        generateValue: true
+        sync: false
+
